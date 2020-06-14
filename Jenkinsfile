@@ -8,18 +8,12 @@ pipeline {
     }  
     stages {
         // Install terraform
-        stage('install') {
+        stage('init') {
             steps{
                   sh '''
                   go get github.com/hashicorp/terraform
                   go install github.com/hashicorp/terraform
                   terraform version
-                  '''
-            }
-        }
-        stage('init') {
-            steps{
-                  sh '''
                   terraform init
                   '''
             }
