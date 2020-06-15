@@ -1,6 +1,6 @@
 image:
-  repository: edge-monitoring-server
-  tag: 0.1.0
+  repository: hyunsunmoon/edge-monitoring-server
+  tag: latest
   pullPolicy: Always
 #  imagePullSecrets:
 #    - name: docker
