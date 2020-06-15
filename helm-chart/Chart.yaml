@@ -3,4 +3,4 @@ description: A Helm chart for Aether Edge monitoring server
 name: aether-monitoring
 icon: https://guide.opencord.org/logos/cord.svg
 
-version: 0.1.1
+version: 0.1.2

@@ -1,6 +1,6 @@
-image:
-  repository: hyunsunmoon/edge-monitoring-server
-  tag: latest
+images:
+  tags:
+    server: "hyunsunmoon/edge-monitoring-server:latest"
   pullPolicy: Always
 #  imagePullSecrets:
 #    - name: docker
