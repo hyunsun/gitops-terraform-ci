@@ -24,6 +24,9 @@ pipeline {
             }
             environment {
                 GOOGLE_BACKEND_CREDENTIALS = credentials('gcpCredential')
+                TF_VAR_rancher_url = "https://rancher-test.aetherproject.org"
+                TF_VAR_rancher_access_key = credentials('rancherAccessKey')
+                TF_VAR_rancher_secret_key = credentials('rancherSecretKey')
             }
             steps {
                   sh '''
