@@ -1,7 +1,7 @@
 pipeline {
     agent none
     stages {
-        stage('Build Temporary Image') {
+        stage('Build Image') {
             agent any
             environment {
                 DOCKER_TAG = "temp-${GIT_COMMIT[0..7]}"
@@ -15,23 +15,56 @@ pipeline {
                 }
             }
         }
-        stage('deploy') {
-            agent {
-                docker { image "golang:1.14"
-                         args "-u root:root" }
-            }
+        stage('Terraform Init') {
+            agent { dockerfile true }
             environment {
                 GOOGLE_BACKEND_CREDENTIALS = credentials('gcpCredential')
-                RANCHER_URL = "https://rancher-test.aetherproject.org"
-                RANCHER_ACCESS_KEY = credentials('rancherAccessKey')
-                RANCHER_SECRET_KEY = credentials('rancherSecretKey')
             }
             steps {
                   sh '''
-                  go get github.com/hashicorp/terraform
-                  go install github.com/hashicorp/terraform
-                  terraform version
-                  cd terraform && terraform init
+                  cd terraform
+                  terraform init
+                  terraform destroy -auto-approve
+                  '''
+            }
+        }
+        stage('Terraform Plan and Apply') {
+            agent { dockerfile true }
+            environment {
+                DOCKER_TAG = "temp-${GIT_COMMIT[0..7]}"
+                GOOGLE_BACKEND_CREDENTIALS = credentials('gcpCredential')
+                TF_VAR_rancher_url = "https://rancher-test.aetherproject.org"
+                TF_VAR_rancher_access_key = credentials('rancherAccessKey')
+                TF_VAR_rancher_secret_key = credentials('rancherSecretKey')
+            }
+            steps {
+                  sh '''
+                  cd terraform
+                  terraform plan -out plan
+                  terraform apply plan
+                  '''
+            }
+        }
+        stage('Run Tests') {
+            agent any
+            steps {
+                  sh '''
+                  echo "Run tests here..."
+                  '''
+            }
+        }
+        stage('Terraform Destroy') {
+            agent { dockerfile true }
+            environment {
+                GOOGLE_BACKEND_CREDENTIALS = credentials('gcpCredential')
+                TF_VAR_rancher_url = "https://rancher-test.aetherproject.org"
+                TF_VAR_rancher_access_key = credentials('rancherAccessKey')
+                TF_VAR_rancher_secret_key = credentials('rancherSecretKey')
+            }
+            steps {
+                  sh '''
+                  cd terraform
+                  terraform destroy -auto-approve
                   '''
             }
         }
