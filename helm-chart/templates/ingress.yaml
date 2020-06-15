@@ -1,0 +1,16 @@
+{{- if .Values.ingress.enabled }}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: edge-monitoring-server
+spec:
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - backend:
+          serviceName: edge-monitoring-server
+          servicePort: 80
+        path: /edges
+{{- end }}

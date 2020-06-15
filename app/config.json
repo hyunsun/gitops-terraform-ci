@@ -1,0 +1,11 @@
+{
+    "edge_name": "production-edge-onf-menlo",
+    "adb": {
+        "path": "/usr/local/bin/adb",
+        "apn_mode_toggle_location": {
+            "x": "550",
+            "y": "700"
+        }
+    },
+    "report_url": "https://aether.onlab.us/edges"
+}

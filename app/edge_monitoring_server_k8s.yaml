@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: edge-monitoring
+spec:
+  finalizers:
+  - kubernetes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-monitoring-server
+  labels:
+    app: edge-monitoring-server
+  namespace: edge-monitoring
+spec:
+  selector:
+    matchLabels:
+      app: edge-monitoring-server
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: edge-monitoring-server
+    spec:
+      containers:
+      - name: server
+        image: docker.io/omecproject/edge-monitoring-server:0.1.0
+        imagePullPolicy: Always
+        command: ["python", "edge_monitoring_server.py"]
+        livenessProbe:
+          httpGet:
+            path: /edges/healthz
+            port: 80
+          initialDelaySeconds: 3
+          periodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-monitoring-server
+  namespace: edge-monitoring
+spec:
+  selector:
+    app: edge-monitoring-server
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: server
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: edge-monitoring-server
+  namespace: edge-monitoring
+spec:
+  rules:
+  - host: aether.onlab.us
+    http:
+      paths:
+      - backend:
+          serviceName: edge-monitoring-server
+          servicePort: 80
+        path: /edges

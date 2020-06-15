@@ -1,0 +1,13 @@
+image:
+  repository: edge-monitoring-server
+  tag: 0.1.0
+  pullPolicy: Always
+#  imagePullSecrets:
+#    - name: docker
+
+ingress:
+  enabled: true
+  host: aether.onlab.us
+
+config:
+  replica: 1
