@@ -16,7 +16,12 @@ pipeline {
             }
         }
         stage('Terraform Init') {
-            agent { dockerfile true }
+            agent {
+                dockerfile {
+                    filename 'Dockerfile.tf'
+                    args '-u root:root'
+                }
+            }
             environment {
                 GOOGLE_BACKEND_CREDENTIALS = credentials('gcpCredential')
             }
@@ -29,7 +34,12 @@ pipeline {
             }
         }
         stage('Terraform Plan and Apply') {
-            agent { dockerfile true }
+            agent {
+                dockerfile {
+                    filename 'Dockerfile.tf'
+                    args '-u root:root'
+                }
+            }
             environment {
                 DOCKER_TAG = "temp-${GIT_COMMIT[0..7]}"
                 GOOGLE_BACKEND_CREDENTIALS = credentials('gcpCredential')
@@ -54,7 +64,12 @@ pipeline {
             }
         }
         stage('Terraform Destroy') {
-            agent { dockerfile true }
+            agent {
+                dockerfile {
+                    filename 'Dockerfile.tf'
+                    args '-u root:root'
+                }
+            }
             environment {
                 GOOGLE_BACKEND_CREDENTIALS = credentials('gcpCredential')
                 TF_VAR_rancher_url = "https://rancher-test.aetherproject.org"
