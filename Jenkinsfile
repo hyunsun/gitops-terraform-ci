@@ -10,8 +10,8 @@ pipeline {
             steps {
                 withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
                     sh '''
-                    make docker-build
-                    make docker-push
+                    make -C ./app docker-build
+                    make -C ./app docker-push
                     '''
                 }
             }
@@ -53,16 +53,14 @@ pipeline {
                 TF_VAR_rancher_secret_key = credentials('rancherSecretKey')
             }
             steps {
-                  /* This step needs to be improved to share this pipeline for all apps */
-                  sh '''
-                  cat >> jenkins.tfvars << EOF
-                  edge_mon_docker_reg = "${DOCKER_REGISTRY}"
-                  edge_mon_image_tag  = "${DOCKER_TAG}"
-                  EOF 
-                  cd terraform
-                  terraform plan -out=plan -var-file=jenkins.tfvars
-                  terraform apply plan
-                  '''
+                /* This step needs to be improved to share this pipeline for all apps */
+                sh '''
+                cd terraform
+                terraform plan -out=plan \
+                  -var edge_mon_docker_reg="${DOCKER_REGISTRY}" \
+                  -var edge_mon_image_tag="${DOCKER_TAG}"
+                terraform apply plan
+                '''
             }
         }
         stage('Run Tests') {
@@ -70,6 +68,7 @@ pipeline {
             steps {
                   sh '''
                   echo "Run some tests here..."
+                  sleep 30
                   '''
             }
         }

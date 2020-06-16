@@ -1,9 +1,9 @@
 terraform {
   required_version = ">= 0.13"
-#  backend "gcs" {
-#    bucket  = "aether-terraform-bucket"
-#    prefix  = "dev/state"
-#  }
+  backend "gcs" {
+    bucket  = "aether-terraform-bucket"
+    prefix  = "dev/state"
+  }
   required_providers {
     rancher2 = {
       source  = "terraform-providers/rancher2"
