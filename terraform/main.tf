@@ -18,6 +18,20 @@ provider "rancher2" {
   secret_key = var.rancher_secret_key
 }
 
+locals {
+  values_yaml = base64encode(templatefile(
+    "${path.module}/values.yml.tpl",
+    {
+      omec_cp_docker_reg      = var.omec_cp_docker_reg
+      omec_cp_hss_image_tag   = var.omec_cp_hss_image_tag
+      omec_cp_mme_image_tag   = var.omec_cp_mme_image_tag
+      omec_cp_spgwc_image_tag = var.omec_cp_spgwc_image_tag
+
+      edge_mon_docker_reg = var.edge_mon_docker_reg
+      edge_mon_image_tag  = var.edge_mon_image_tag
+    }))
+}
+
 module "dev-central" {
   source = "./modules/cluster"
 
@@ -30,9 +44,22 @@ module "dev-central" {
           name             = "edge-monitoring"
           catalog_name     = "gitops-terraform-test"
           target_namespace = "edge-monitoring"
-          template_name    = "aether-monitoring"
-          template_version = var.edge_monitoring.chart_version
-          values_yaml      = base64encode(templatefile("${path.module}/edge-monitoring.yml.tpl", var.edge_monitoring))
+          template_name    = "edge-monitoring"
+          template_version = var.edge_mon_chart_ver
+          values_yaml      = local.values_yaml
+        }
+      }
+    },
+    connectivity_service = {
+      name = "ConnectivityService"
+      apps = {
+        omec_control_plane = {
+          name             = "omec-control-plane"
+          catalog_name     = "cord"
+          target_namespace = "omec"
+          template_name    = "omec-control-plane"
+          template_version = var.omec_cp_chart_ver
+          values_yaml      = local.values_yaml
         }
       }
     }
