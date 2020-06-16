@@ -23,7 +23,7 @@ spec:
       {{- end }}
       containers:
       - name: server
-        image: "{{ .Values.images.tags.server }}"
+        image: {{ .Values.images.tags.edgeMonitoring | quote }}
         imagePullPolicy: {{ .Values.images.pullPolicy }}
         command: ["python", "edge_monitoring_server.py"]
         livenessProbe:
