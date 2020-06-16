@@ -2,6 +2,11 @@ pipeline {
     agent none
     stages {
         stage('Build Image') {
+            when {
+                not {
+                    branch 'master'
+                }
+            }
             agent any
             environment {
                 DOCKER_REGISTRY = "docker.io/hyunsunmoon"
@@ -17,6 +22,11 @@ pipeline {
             }
         }
         stage('Terraform Init') {
+            when {
+                not {
+                    branch 'master'
+                }
+            }
             agent {
                 dockerfile {
                     filename 'Dockerfile.tf'
@@ -38,6 +48,11 @@ pipeline {
             }
         }
         stage('Terraform Plan and Apply') {
+            when {
+                not {
+                    branch 'master'
+                }
+            }
             agent {
                 dockerfile {
                     filename 'Dockerfile.tf'
@@ -64,6 +79,11 @@ pipeline {
             }
         }
         stage('Run Tests') {
+            when {
+                not {
+                    branch 'master'
+                }
+            }
             agent any
             steps {
                   sh '''
@@ -73,6 +93,11 @@ pipeline {
             }
         }
         stage('Terraform Destroy') {
+            when {
+                not {
+                    branch 'master'
+                }
+            }
             agent {
                 dockerfile {
                     filename 'Dockerfile.tf'
@@ -86,10 +111,35 @@ pipeline {
                 TF_VAR_rancher_secret_key = credentials('rancherSecretKey')
             }
             steps {
-                  sh '''
-                  cd terraform
-                  terraform destroy -auto-approve
-                  '''
+                script {
+                    try {
+                        sh '''
+                        cd terraform
+                        terraform destroy -auto-approve
+                        '''
+                    } catch (err) {
+                        echo err.getMessage()
+                    }
+                }
+                echo currentBuild.result
+            }
+        }
+        stage('Publish Image') {
+            when {
+                branch 'master'
+            }
+            agent any
+            environment {
+                DOCKER_REGISTRY = "docker.io/hyunsunmoon"
+                DOCKER_TAG = "${GIT_COMMIT[0..7]}"
+            }
+            steps {
+                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
+                    sh '''
+                    make -C ./app docker-build
+                    make -C ./app docker-push
+                    '''
+                }
             }
         }
     }
