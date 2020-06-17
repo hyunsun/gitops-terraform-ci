@@ -20,7 +20,7 @@ from flask import Flask, jsonify, abort, request
 app = Flask(__name__)
 edges = [
     {
-        'name': 'prod-edge-example',
+        'name': 'prod-example',
         'status': {
             'control_plane': 'connected',
             'user_plane': 'connected'
